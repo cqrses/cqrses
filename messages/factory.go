@@ -11,6 +11,8 @@ type (
 		Unserialize([]byte) (Message, error)
 	}
 
+	JSONMessageFactory struct{}
+
 	JSONMessage struct {
 		MessageID   string                 `json:"message_id"`
 		MessageName string                 `json:"message_name"`
@@ -23,8 +25,6 @@ type (
 	JSONMessageWrapper struct {
 		values *JSONMessage
 	}
-
-	JSONMessageFactory struct{}
 )
 
 func (f *JSONMessageFactory) Serialize(m Message) ([]byte, error) {
