@@ -5,20 +5,7 @@ import (
 	"time"
 )
 
-const (
-	// EventCausationID should be set on a context where a command
-	// is called, this will allow us to pull the command id out and
-	// set it as the causation ID.
-	EventCausationID eventMetaKey = "causation_id"
-
-	// EventCorrelationID if another event caused this new event we should
-	// set that as the correlation id on the event's metadata.
-	EventCorrelationID eventMetaKey = "correlation_id"
-)
-
 type (
-	eventMetaKey string
-
 	// Event describes something that has happened.
 	Event struct {
 		messageID   string

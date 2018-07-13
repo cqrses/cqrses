@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"time"
 
 	"gopkg.in/cqrses/eventstore"
+	"gopkg.in/cqrses/messages"
 )
 
 const (
@@ -26,3 +28,14 @@ type (
 		store eventstore.EventStore
 	}
 )
+
+func (h *userHandlers) Handle(ctx context.Context, m messages.Message) error {
+	switch m.MessageName() {
+	case createUserCommand:
+	}
+	return nil
+}
+
+func (*user) create(ctx context.Context, m messages.Message) {
+
+}
