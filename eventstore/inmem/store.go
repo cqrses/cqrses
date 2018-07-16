@@ -35,11 +35,11 @@ func (s EventStore) Load(ctx context.Context, streamName string, from, count uin
 	}
 
 	total := uint64(len(stream.Events))
-	events := make([]*messages.Event, 0, total)
+	events := make([]*messages.Event, 0, count)
 	taken := uint64(0)
 
 	if from < total {
-		for _, e := range stream.Events {
+		for _, e := range stream.Events[from:] {
 			if matcher.MatchEventMetadata(e.Metadata()) {
 				events = append(events, e)
 				taken++
@@ -66,14 +66,20 @@ func (s EventStore) LoadReverse(ctx context.Context, streamName string, from, co
 	}
 
 	total := uint64(len(stream.Events))
-	events := make([]*messages.Event, 0, total)
+	events := make([]*messages.Event, 0, count)
+	skipped := uint64(0)
 	taken := uint64(0)
 
 	if from < total {
-		for i := total; i > 0; i-- {
+
+		for i := total - 1; i >= 0; i-- {
 			if matcher.MatchEventMetadata(stream.Events[i].Metadata()) {
-				events = append(events, stream.Events[i])
-				taken++
+				if skipped > from {
+					events = append(events, stream.Events[i])
+					taken++
+				} else {
+					skipped++
+				}
 			}
 
 			if taken == count {
@@ -107,7 +113,7 @@ func (s EventStore) FetchStreamNames(ctx context.Context, filter string, matcher
 			continue
 		}
 
-		sn[i] = k
+		sn = append(sn, k)
 
 		if limit == i {
 			break
@@ -136,7 +142,7 @@ func (s EventStore) FetchStreamNamesRegex(ctx context.Context, filter string, ma
 			continue
 		}
 
-		sn[i] = k
+		sn = append(sn, k)
 
 		if limit == i {
 			break

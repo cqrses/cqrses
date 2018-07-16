@@ -21,6 +21,10 @@ func (s *StreamIterator) Current() *messages.Event {
 
 // Next will move the cursor forward.
 func (s *StreamIterator) Next() error {
+	if s.Error != nil {
+		return s.Error
+	}
+
 	s.position++
 
 	if s.position >= len(s.Events) {
