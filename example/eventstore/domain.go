@@ -37,5 +37,6 @@ func (h *userHandlers) Handle(ctx context.Context, m messages.Message) error {
 }
 
 func (*user) create(ctx context.Context, m messages.Message) {
-
+	data := &createUserPayload{}
+	data.Payload()
 }

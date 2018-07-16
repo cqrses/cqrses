@@ -15,8 +15,8 @@ const (
 )
 
 type (
-	// CreateUserPayload is used to provide data for the CreateUser command.
-	CreateUserPayload struct {
+	// createUserPayload is used to provide data for the CreateUser command.
+	createUserPayload struct {
 		userID       string
 		emailAddress string
 		password     string
@@ -25,7 +25,7 @@ type (
 
 // CreateUserWith ...
 func CreateUserWith(ctx context.Context, id, emailAddress, hashedPassword string) (*messages.Command, error) {
-	pl := &CreateUserPayload{
+	pl := &createUserPayload{
 		userID:       id,
 		emailAddress: emailAddress,
 		password:     hashedPassword,
@@ -48,7 +48,7 @@ func CreateUserWith(ctx context.Context, id, emailAddress, hashedPassword string
 
 // Validate will ensure all related information for creating the user
 // is availabile within the payload payload.
-func (c *CreateUserPayload) Validate() error {
+func (c *createUserPayload) Validate() error {
 	if len(c.userID) < 34 {
 		return errors.New("user id not valid")
 	}
@@ -64,7 +64,7 @@ func (c *CreateUserPayload) Validate() error {
 	return nil
 }
 
-func (c *CreateUserPayload) Payload() map[string]interface{} {
+func (c *createUserPayload) Payload() map[string]interface{} {
 	return map[string]interface{}{
 		"user_id":       c.userID,
 		"email_address": c.emailAddress,
@@ -72,7 +72,7 @@ func (c *CreateUserPayload) Payload() map[string]interface{} {
 	}
 }
 
-func (c *CreateUserPayload) FromPayload(data map[string]interface{}) {
+func (c *createUserPayload) FromPayload(data map[string]interface{}) {
 	c.userID, _ = data["user_id"].(string)
 	c.emailAddress, _ = data["email_address"].(string)
 	c.password, _ = data["password"].(string)
