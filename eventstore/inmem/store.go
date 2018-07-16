@@ -34,8 +34,8 @@ func (s EventStore) Load(ctx context.Context, streamName string, from, count uin
 		return &StreamIterator{Error: eventstore.ErrStreamDoesNotExist}
 	}
 
-	events := []*messages.Event{}
 	total := uint64(len(stream.Events))
+	events := make([]*messages.Event, 0, total)
 
 	if from < total {
 		for _, e := range stream.Events {
@@ -63,8 +63,8 @@ func (s EventStore) LoadReverse(ctx context.Context, streamName string, from, co
 		return &StreamIterator{Error: eventstore.ErrStreamDoesNotExist}
 	}
 
-	events := []*messages.Event{}
 	total := uint64(len(stream.Events))
+	events := make([]*messages.Event, 0, total)
 
 	if from < total {
 		for i := total; i > 0; i-- {
