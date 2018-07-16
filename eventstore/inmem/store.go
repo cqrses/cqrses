@@ -36,14 +36,16 @@ func (s EventStore) Load(ctx context.Context, streamName string, from, count uin
 
 	total := uint64(len(stream.Events))
 	events := make([]*messages.Event, 0, total)
+	taken := uint64(0)
 
 	if from < total {
 		for _, e := range stream.Events {
 			if matcher.MatchEventMetadata(e.Metadata()) {
 				events = append(events, e)
+				taken++
 			}
 
-			if uint64(len(events)) == count {
+			if taken == count {
 				break
 			}
 		}
@@ -65,14 +67,16 @@ func (s EventStore) LoadReverse(ctx context.Context, streamName string, from, co
 
 	total := uint64(len(stream.Events))
 	events := make([]*messages.Event, 0, total)
+	taken := uint64(0)
 
 	if from < total {
 		for i := total; i > 0; i-- {
 			if matcher.MatchEventMetadata(stream.Events[i].Metadata()) {
 				events = append(events, stream.Events[i])
+				taken++
 			}
 
-			if uint64(len(events)) == count {
+			if taken == count {
 				break
 			}
 		}
