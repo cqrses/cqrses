@@ -1,67 +1,128 @@
 package aggregate
 
 import (
+	"context"
 	"sync"
 
+	"gopkg.in/cqrses/eventstore"
 	"gopkg.in/cqrses/messages"
 )
 
 type (
-	Stream struct {
-		aggregate Aggregate
-		events    []*messages.Event
-		pending   []*messages.Event
-		version   uint64
-		lock      *sync.Mutex
+	// Aggregate manages the history.
+	Aggregate struct {
+		// The ID of the aggregate we are dealing with.
+		aggregateID string
+		// The event store to store events in.
+		store eventstore.EventStore
+		// The name of the stream to store events in.
+		streamName string
+		// A slice of events pending to go into the event store.
+		pending []*messages.Event
+		// The current version.
+		version uint64
+		// Aggregate state.
+		state State
+		// A lock used to ensure no race conditions within the instance.
+		lock *sync.Mutex
 	}
 
-	Aggregate interface {
-		Identifier() string
-		WithStream(*Stream)
-		Stream() *Stream
+	// EventRecorder will record aggregate events.
+	EventRecorder func(eventName string, data map[string]interface{}) error
+
+	// State is the user land implementation of the aggregate.
+	State interface {
+		Handle(context.Context, messages.Message, EventRecorder) error
 		Apply(*messages.Event) error
 	}
 )
 
-// InitialiseAggregate will create a fresh stream on the aggregate.
-func InitialiseAggregate(a Aggregate) {
-	a.WithStream(&Stream{
-		aggregate: a,
-		events:    []*messages.Event{},
-		pending:   []*messages.Event{},
-		version:   0,
-		lock:      &sync.Mutex{},
+// New should be used when intiailising an aggregate.
+func New(aID string, store eventstore.EventStore, streamName string, state State) *Aggregate {
+	return &Aggregate{
+		aggregateID: aID,
+		store:       store,
+		streamName:  streamName,
+		pending:     []*messages.Event{},
+		version:     0,
+		state:       state,
+		lock:        &sync.Mutex{},
+	}
+}
+
+// Load will get an aggregates Aggregate, reconstitue the aggregate using the
+// event handler provided and then returning the Aggregate to allow adding more events.
+func Load(ctx context.Context, aID string, store eventstore.EventStore, streamName string, state State) (*Aggregate, error) {
+	a := &Aggregate{
+		aggregateID: aID,
+		store:       store,
+		streamName:  streamName,
+		pending:     []*messages.Event{},
+		version:     0,
+		state:       state,
+		lock:        &sync.Mutex{},
+	}
+
+	events := store.Load(ctx, streamName, 0, 0, eventstore.MetadataMatcher{
+		"aggregate_id": eventstore.MetadataMatcherCondition{
+			Operation: eventstore.MatchOpEq,
+			Values:    []string{aID},
+		},
+	})
+	defer events.Close()
+
+	for {
+		if err := events.Next(); err != nil {
+			if err == eventstore.EOF {
+				break
+			}
+
+			return nil, err
+		}
+
+		event := events.Current()
+		if err := a.state.Apply(event); err != nil {
+			return nil, err
+		}
+		a.version = event.Version()
+	}
+
+	return a, nil
+}
+
+// Handle will execute the callback with the message and persist any events.
+func (h *Aggregate) Handle(ctx context.Context, msg messages.Message) error {
+	h.lock.Lock()
+	defer h.lock.Unlock()
+
+	return h.state.Handle(ctx, msg, func(eventName string, data map[string]interface{}) error {
+		return h.record(ctx, eventName, data)
 	})
 }
 
-// ReconstituteAggregate will apply all the events in the stream to
-// the aggregate restoring it's state.
-func ReconstituteAggregate(a Aggregate, e []*messages.Event) error {
-	InitialiseAggregate(a)
-	h := a.Stream()
+// RecordThat an event that has happened increasing the version of the aggregate.
+func (h *Aggregate) RecordThat(ctx context.Context, eventName string, data map[string]interface{}) error {
+	h.lock.Lock()
+	defer h.lock.Unlock()
 
-	for _, e := range e {
-		h.version = e.Version()
-		if err := a.Apply(e); err != nil {
-			return err
-		}
-	}
-	return nil
+	return h.record(ctx, eventName, data)
 }
 
-// RecordThat records the event that has happened increasing
-// the version of the aggregate.
-func (r *Stream) RecordThat(e *messages.Event) error {
-	e = e.WithVersion(r.version + 1)
-	r.events = append(r.events, e)
-	return r.aggregate.Apply(e)
+func (h *Aggregate) record(ctx context.Context, eventName string, data map[string]interface{}) error {
+	h.version++
+	event := messages.NewAggregateEvent(ctx, h.aggregateID, h.version, eventName, data)
+	h.pending = append(h.pending, event)
+	return h.state.Apply(event)
 }
 
-func (r *Stream) popRecordedEvents() []*messages.Event {
-	r.lock.Lock()
+// Close will persist any pending events, returning an error if anything failed,
+// if an error is returned all pending events will be missing still.
+func (h *Aggregate) Close(ctx context.Context) error {
+	h.lock.Lock()
 	defer func() {
-		r.pending = []*messages.Event{}
-		r.lock.Unlock()
+		h.pending = []*messages.Event{}
+		h.lock.Unlock()
 	}()
-	return r.pending
+
+	return h.store.AppendTo(ctx, h.streamName, h.pending)
 }

@@ -13,4 +13,12 @@ const (
 	// set that as the correlation id on the event's metadata.
 	// Read more: https://blog.arkency.com/correlation-id-and-causation-id-in-evented-systems/
 	MetaCorrelationID metaKey = "correlation_id"
+
+	// MetaAggregateID is the identifier of an aggregate, used when using event sourcing.
+	MetaAggregateID metaKey = "aggregate_id"
+
+	// MetaAggregateVersion should be set on an event for the version it is targeting, for
+	// example if you've loaded an aggregate at version 6 the next version should be 7.
+	// Versions start from 1!
+	MetaAggregateVersion metaKey = "aggregate_version"
 )

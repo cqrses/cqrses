@@ -3,6 +3,8 @@ package messages
 import (
 	"context"
 	"time"
+
+	"github.com/satori/go.uuid"
 )
 
 type (
@@ -34,14 +36,31 @@ func NewEvent(id, name string, data, metadata map[string]interface{}, version ui
 // that we know can be added to events such as
 // causation id.
 func NewEventFromContext(ctx context.Context, id, name string, data, metadata map[string]interface{}, version uint64, created time.Time) *Event {
-	return &Event{
-		messageID:   id,
-		messageName: name,
-		data:        data,
-		metadata:    metadata,
-		version:     version,
-		created:     created,
+	if v, ok := ctx.Value(MetaCausationID).(string); ok {
+		metadata[string(MetaCausationID)] = v
 	}
+
+	if v, ok := ctx.Value(MetaCorrelationID).(string); ok {
+		metadata[string(MetaCorrelationID)] = v
+	}
+
+	return NewEvent(id, name, data, metadata, version, created)
+}
+
+// NewAggregateEvent created a new event for an aggregate.
+func NewAggregateEvent(ctx context.Context, aggregateID string, aggregateVersion uint64, eventName string, data map[string]interface{}) *Event {
+	return NewEventFromContext(
+		ctx,
+		uuid.Must(uuid.NewV4()).String(),
+		eventName,
+		data,
+		map[string]interface{}{
+			string(MetaAggregateID):      aggregateID,
+			string(MetaAggregateVersion): aggregateVersion,
+		},
+		aggregateVersion,
+		time.Now(),
+	)
 }
 
 // MessageID returns the id of the message.

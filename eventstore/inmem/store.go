@@ -40,13 +40,13 @@ func (s EventStore) Load(ctx context.Context, streamName string, from, count uin
 
 	if from < total {
 		for _, e := range stream.Events[from:] {
+			if count > 0 && taken == count {
+				break
+			}
+
 			if matcher.MatchEventMetadata(e.Metadata()) {
 				events = append(events, e)
 				taken++
-			}
-
-			if taken == count {
-				break
 			}
 		}
 	}
@@ -73,6 +73,10 @@ func (s EventStore) LoadReverse(ctx context.Context, streamName string, from, co
 	if from < total {
 
 		for i := total - 1; i >= 0; i-- {
+			if count > 0 && taken == count {
+				break
+			}
+
 			if matcher.MatchEventMetadata(stream.Events[i].Metadata()) {
 				if skipped > from {
 					events = append(events, stream.Events[i])
@@ -80,10 +84,6 @@ func (s EventStore) LoadReverse(ctx context.Context, streamName string, from, co
 				} else {
 					skipped++
 				}
-			}
-
-			if taken == count {
-				break
 			}
 		}
 	}

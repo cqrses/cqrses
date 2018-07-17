@@ -29,8 +29,8 @@ const (
 		"    `payload` JSON NOT NULL," +
 		"    `metadata` JSON NOT NULL," +
 		"    `created_at` DATETIME(6) NOT NULL," +
-		"    `aggregate_version` INT(11) UNSIGNED GENERATED ALWAYS AS (JSON_EXTRACT(metadata, '$._aggregate_version')) STORED NOT NULL," +
-		"    `aggregate_id` CHAR(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(metadata, '$._aggregate_id'))) STORED NOT NULL," +
+		"    `aggregate_version` INT(11) UNSIGNED GENERATED ALWAYS AS (JSON_EXTRACT(metadata, '$.aggregate_version')) STORED NOT NULL," +
+		"    `aggregate_id` CHAR(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.aggregate_id'))) STORED NOT NULL," +
 		"    PRIMARY KEY (`no`)," +
 		"    UNIQUE KEY `ix_event_id` (`event_id`)," +
 		"    UNIQUE KEY `ix_unique_event` (`aggregate_id`, `aggregate_version`)" +

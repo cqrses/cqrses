@@ -1,44 +1,44 @@
 package bus
 
-import (
-	"context"
-	"errors"
+// import (
+// 	"context"
+// 	"errors"
 
-	"gopkg.in/cqrses/messages"
-)
+// 	"gopkg.in/cqrses/messages"
+// )
 
-var (
-	ErrQueryAlreadyRegistered = errors.New("query already registered")
-)
+// var (
+// 	ErrQueryAlreadyRegistered = errors.New("query already registered")
+// )
 
-type (
-	QueryHandler func(context.Context, messages.Message) (interface{}, error)
+// type (
+// 	QueryHandler func(context.Context, messages.Message) (interface{}, error)
 
-	QueryBus struct {
-		handlers map[string]QueryHandler
-	}
-)
+// 	QueryBus struct {
+// 		handlers map[string]QueryHandler
+// 	}
+// )
 
-func (b *QueryBus) Register(n string, h QueryHandler) error {
-	if _, ok := b.handlers[n]; ok {
-		return ErrCommandAlreadyRegistered
-	}
+// func (b *QueryBus) Register(n string, h QueryHandler) error {
+// 	if _, ok := b.handlers[n]; ok {
+// 		return ErrCommandAlreadyRegistered
+// 	}
 
-	b.handlers[n] = h
+// 	b.handlers[n] = h
 
-	return nil
-}
+// 	return nil
+// }
 
-func (c *QueryBus) Handle(ctx context.Context, m messages.Message) (interface{}, error) {
-	h, ok := c.handlers[m.MessageName()]
-	if !ok {
-		return nil, ErrNoHandlerFound
-	}
+// func (c *QueryBus) Handle(ctx context.Context, m messages.Message) (interface{}, error) {
+// 	h, ok := c.handlers[m.MessageName()]
+// 	if !ok {
+// 		return nil, ErrNoHandlerFound
+// 	}
 
-	res, err := h(ctx, m)
-	if err != nil {
-		return nil, &Error{original: err}
-	}
+// 	res, err := h(ctx, m)
+// 	if err != nil {
+// 		return nil, &Error{original: err}
+// 	}
 
-	return res, nil
-}
+// 	return res, nil
+// }

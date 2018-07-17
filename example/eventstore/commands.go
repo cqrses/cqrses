@@ -7,6 +7,9 @@ import (
 
 	"github.com/satori/go.uuid"
 
+	"gopkg.in/cqrses/aggregate"
+	"gopkg.in/cqrses/bus"
+	"gopkg.in/cqrses/esbridge"
 	"gopkg.in/cqrses/messages"
 )
 
@@ -23,8 +26,23 @@ type (
 	}
 )
 
-// CreateUserWith ...
-func CreateUserWith(ctx context.Context, id, emailAddress, hashedPassword string) (*messages.Command, error) {
+func registerCommandBusHandlers(cmdBus *bus.CommandBus) {
+	cmdBus.Register(createUserCommand, func(ctx context.Context, msg messages.Message) error {
+		es := esbridge.MustGetEventStoreFromContext(ctx)
+		userID, ok := msg.Data()["user_id"].(string)
+		if !ok {
+			return errors.New("expected user id and did not get one")
+		}
+
+		u := &user{}
+		a := aggregate.New(userID, es, "users", u)
+		a.Handle(ctx, msg)
+
+		return a.Close(ctx)
+	})
+}
+
+func createUserWith(ctx context.Context, id, emailAddress, hashedPassword string) (*messages.Command, error) {
 	pl := &createUserPayload{
 		userID:       id,
 		emailAddress: emailAddress,
