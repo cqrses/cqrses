@@ -34,6 +34,13 @@ func (u *user) Handle(ctx context.Context, msg messages.Message, er aggregate.Ev
 			return err
 		}
 		return er(userCreated, data.Payload())
+	case changeUserPasswordCommand:
+		data := &changeUserPasswordPayload{}
+		data.FromPayload(msg.Data())
+		if err := data.Validate(); err != nil {
+			return err
+		}
+		return er(userPasswordChanged, data.Payload())
 	}
 	return nil
 }

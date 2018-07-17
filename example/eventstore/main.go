@@ -35,9 +35,13 @@ func main() {
 
 	for _, user := range []string{"a1", "b2", "c3", "d4", "e5"} {
 		cmd, _ := createUserWith(ctx, "638d863b-3248-4b56-9d0a-e25f62c8cb"+user, user+"@testing.com", "changeme")
-
 		if err := cmdBus.Handle(ctx, cmd); err != nil {
 			log.Fatalf("unable to create user(%s): %s", user, err)
+		}
+
+		cmd, _ = changeUserPassword(ctx, "638d863b-3248-4b56-9d0a-e25f62c8cb"+user, "moreSecure")
+		if err := cmdBus.Handle(ctx, cmd); err != nil {
+			log.Fatalf("unable to change user(%s) to a more secure password: %s", user, err)
 		}
 	}
 
