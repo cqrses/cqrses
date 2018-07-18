@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/cqrses/eventstore"
-	"gopkg.in/cqrses/eventstore/inmem"
-	"gopkg.in/cqrses/messages"
+	"github.com/go-cqrses/cqrses/eventstore"
+	"github.com/go-cqrses/cqrses/eventstore/inmem"
+	"github.com/go-cqrses/cqrses/messages"
 )
 
 func TestStore(t *testing.T) {

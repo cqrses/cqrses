@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"gopkg.in/cqrses/messages"
+	"github.com/go-cqrses/cqrses/messages"
 )
 
 func TestJSONMessageFactory(t *testing.T) {

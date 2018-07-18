@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"gopkg.in/cqrses/eventstore"
+	"github.com/go-cqrses/cqrses/eventstore"
 )
 
 func metadataMatcherConditionsToSQL(conditions eventstore.MetadataMatcher) (string, []interface{}) {

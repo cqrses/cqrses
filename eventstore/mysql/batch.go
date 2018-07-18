@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"gopkg.in/cqrses/eventstore"
+	"github.com/go-cqrses/cqrses/eventstore"
 )
 
 type (

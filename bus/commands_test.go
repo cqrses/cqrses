@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"gopkg.in/cqrses/bus"
-	"gopkg.in/cqrses/messages"
+	"github.com/go-cqrses/cqrses/bus"
+	"github.com/go-cqrses/cqrses/messages"
 
 	"github.com/stretchr/testify/assert"
 )

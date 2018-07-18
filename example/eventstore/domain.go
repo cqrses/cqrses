@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"gopkg.in/cqrses/aggregate"
-	"gopkg.in/cqrses/messages"
+	"github.com/go-cqrses/cqrses/aggregate"
+	"github.com/go-cqrses/cqrses/messages"
 )
 
 const (

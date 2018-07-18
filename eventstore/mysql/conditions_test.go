@@ -3,7 +3,7 @@ package mysql
 import (
 	"testing"
 
-	"gopkg.in/cqrses/eventstore"
+	"github.com/go-cqrses/cqrses/eventstore"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -3,9 +3,9 @@ package esbridge
 import (
 	"context"
 
-	"gopkg.in/cqrses/bus"
-	"gopkg.in/cqrses/eventstore"
-	"gopkg.in/cqrses/messages"
+	"github.com/go-cqrses/cqrses/bus"
+	"github.com/go-cqrses/cqrses/eventstore"
+	"github.com/go-cqrses/cqrses/messages"
 )
 
 type (

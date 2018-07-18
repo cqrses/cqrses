@@ -7,10 +7,10 @@ import (
 
 	"github.com/satori/go.uuid"
 
-	"gopkg.in/cqrses/aggregate"
-	"gopkg.in/cqrses/bus"
-	"gopkg.in/cqrses/esbridge"
-	"gopkg.in/cqrses/messages"
+	"github.com/go-cqrses/cqrses/aggregate"
+	"github.com/go-cqrses/cqrses/bus"
+	"github.com/go-cqrses/cqrses/esbridge"
+	"github.com/go-cqrses/cqrses/messages"
 )
 
 const (

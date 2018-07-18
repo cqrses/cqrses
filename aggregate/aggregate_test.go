@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"gopkg.in/cqrses/aggregate"
-	"gopkg.in/cqrses/eventstore"
-	"gopkg.in/cqrses/eventstore/inmem"
-	"gopkg.in/cqrses/messages"
+	"github.com/go-cqrses/cqrses/aggregate"
+	"github.com/go-cqrses/cqrses/eventstore"
+	"github.com/go-cqrses/cqrses/eventstore/inmem"
+	"github.com/go-cqrses/cqrses/messages"
 
 	"github.com/stretchr/testify/assert"
 )

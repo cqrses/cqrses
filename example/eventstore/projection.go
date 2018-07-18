@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"gopkg.in/cqrses/messages"
+	"github.com/go-cqrses/cqrses/messages"
 )
 
 type (

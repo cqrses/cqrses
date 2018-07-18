@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"gopkg.in/cqrses/eventstore"
+	"github.com/go-cqrses/cqrses/eventstore"
 
 	"github.com/go-sql-driver/mysql"
 )

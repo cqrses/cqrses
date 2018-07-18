@@ -7,10 +7,10 @@ import (
 	"log"
 	"os"
 
-	"gopkg.in/cqrses/bus"
-	"gopkg.in/cqrses/esbridge"
-	"gopkg.in/cqrses/eventstore"
-	"gopkg.in/cqrses/eventstore/mysql"
+	"github.com/go-cqrses/cqrses/bus"
+	"github.com/go-cqrses/cqrses/esbridge"
+	"github.com/go-cqrses/cqrses/eventstore"
+	"github.com/go-cqrses/cqrses/eventstore/mysql"
 )
 
 func main() {

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/cqrses/bus"
-	"gopkg.in/cqrses/messages"
+	"github.com/go-cqrses/cqrses/bus"
+	"github.com/go-cqrses/cqrses/messages"
 )
 
 func TestEventBus(t *testing.T) {

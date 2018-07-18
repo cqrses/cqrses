@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/cqrses/messages"
+	"github.com/go-cqrses/cqrses/messages"
 )
 
 type myPayload struct {

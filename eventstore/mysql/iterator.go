@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"gopkg.in/cqrses/eventstore"
-	"gopkg.in/cqrses/messages"
+	"github.com/go-cqrses/cqrses/eventstore"
+	"github.com/go-cqrses/cqrses/messages"
 )
 
 type (

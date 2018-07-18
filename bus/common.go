@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"gopkg.in/cqrses/messages"
+	"github.com/go-cqrses/cqrses/messages"
 )
 
 var (
