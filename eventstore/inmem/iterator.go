@@ -1,6 +1,8 @@
 package inmem
 
 import (
+	"context"
+
 	"gopkg.in/cqrses/eventstore"
 	"gopkg.in/cqrses/messages"
 )
@@ -20,7 +22,7 @@ func (s *StreamIterator) Current() *messages.Event {
 }
 
 // Next will move the cursor forward.
-func (s *StreamIterator) Next() error {
+func (s *StreamIterator) Next(context.Context) error {
 	if s.Error != nil {
 		return s.Error
 	}

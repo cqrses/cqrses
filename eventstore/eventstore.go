@@ -11,6 +11,10 @@ var (
 	// ErrStreamDoesNotExist is returned when attempting to read from
 	// a stream that does not exist.
 	ErrStreamDoesNotExist = errors.New("stream does not exist")
+
+	// ErrStreamAlreadyExists is returned when attempting to create a
+	// stream that does already exists.
+	ErrStreamAlreadyExists = errors.New("stream already exists")
 )
 
 type (

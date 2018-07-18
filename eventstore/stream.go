@@ -1,6 +1,7 @@
 package eventstore
 
 import (
+	"context"
 	"io"
 	"regexp"
 
@@ -53,7 +54,7 @@ type (
 		Current() *messages.Event
 
 		// Next will move the cursor forward.
-		Next() error
+		Next(context.Context) error
 
 		// Rewind will go back to the begining of the stream.
 		Rewind()
@@ -70,6 +71,15 @@ func EmptyStreamWithName(name string) *Stream {
 		Name:     name,
 		Metadata: StreamMetadata{},
 		Events:   []*messages.Event{},
+	}
+}
+
+// NewStreamWithName returns a new stream with the data provided.
+func NewStreamWithName(name string, metadata StreamMetadata, events []*messages.Event) *Stream {
+	return &Stream{
+		Name:     name,
+		Metadata: metadata,
+		Events:   events,
 	}
 }
 

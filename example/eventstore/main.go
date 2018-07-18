@@ -10,14 +10,26 @@ import (
 	"gopkg.in/cqrses/bus"
 	"gopkg.in/cqrses/esbridge"
 	"gopkg.in/cqrses/eventstore"
-	"gopkg.in/cqrses/eventstore/inmem"
+	"gopkg.in/cqrses/eventstore/mysql"
 )
 
 func main() {
 	ctx := context.Background()
 
-	var es eventstore.EventStore = inmem.New()
-	es.Create(ctx, eventstore.EmptyStreamWithName("users"))
+	var es eventstore.EventStore
+	es, err := mysql.New(ctx, "root:abcd@tcp(localhost:3306)/events", mysql.DefaultBatchSize)
+	if err != nil {
+		log.Fatalf("unable to connect to database: %s", err)
+	}
+
+	// Clean up any event stream that already exists.
+	if err := es.Delete(ctx, "users"); err != nil && err != eventstore.ErrStreamDoesNotExist {
+		log.Fatalf("unable to delete users stream: %s", err)
+	}
+
+	if err := es.Create(ctx, eventstore.EmptyStreamWithName("users")); err != nil {
+		log.Fatalf("unable to create users stream: %s", err)
+	}
 
 	eventBus := bus.NewEventBus()
 
@@ -65,7 +77,26 @@ func main() {
 			fmt.Println("Showing all recorded events in users stream:")
 			events := es.Load(ctx, "users", 0, 0, nil)
 			for {
-				if err := events.Next(); err != nil {
+				if err := events.Next(ctx); err != nil {
+					if err == eventstore.EOF {
+						break
+					}
+
+					log.Fatalf("error: %s", err)
+				}
+
+				e := events.Current()
+				fmt.Printf(
+					" - event: %s (id: %s)\n",
+					e.MessageName(),
+					e.MessageID(),
+				)
+			}
+		case "show events backwards":
+			fmt.Println("Showing all recorded events in users stream (backwards):")
+			events := es.LoadReverse(ctx, "users", 0, 0, nil)
+			for {
+				if err := events.Next(ctx); err != nil {
 					if err == eventstore.EOF {
 						break
 					}
@@ -84,7 +115,7 @@ func main() {
 			fmt.Println("Showing raw recorded events in users stream:")
 			events := es.Load(ctx, "users", 0, 0, nil)
 			for {
-				if err := events.Next(); err != nil {
+				if err := events.Next(ctx); err != nil {
 					if err == eventstore.EOF {
 						break
 					}

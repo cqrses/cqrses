@@ -72,7 +72,7 @@ func Load(ctx context.Context, aID string, store eventstore.EventStore, streamNa
 	defer events.Close()
 
 	for {
-		if err := events.Next(); err != nil {
+		if err := events.Next(ctx); err != nil {
 			if err == eventstore.EOF {
 				break
 			}

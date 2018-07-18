@@ -163,6 +163,14 @@ func (s EventStore) FetchStreamMetadata(ctx context.Context, streamName string) 
 
 // Create will create the stream with the name and metadata provided.
 func (s EventStore) Create(ctx context.Context, stream *eventstore.Stream) error {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	_, ok := s.streams[stream.Name]
+	if !ok {
+		return eventstore.ErrStreamAlreadyExists
+	}
+
 	s.streams[stream.Name] = stream
 	return nil
 }
