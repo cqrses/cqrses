@@ -2,10 +2,17 @@ package aggregate
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/go-cqrses/cqrses/eventstore"
 	"github.com/go-cqrses/cqrses/messages"
+)
+
+var (
+	// ErrInvalidPayload should be returned when a command or event payload
+	// was not as expected.
+	ErrInvalidPayload = errors.New("the payload was invalid")
 )
 
 type (
