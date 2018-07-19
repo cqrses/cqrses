@@ -26,6 +26,11 @@ func (e ErrPayloadValidationFailed) FailedKeys() []string {
 	return res
 }
 
+// Empty will return a boolean value based on the map being empty.
+func (e ErrPayloadValidationFailed) Empty() bool {
+	return len(e) != 0
+}
+
 func (e ErrPayloadValidationFailed) Error() string {
 	res := "invalid payload:"
 	for key, msgs := range e {
