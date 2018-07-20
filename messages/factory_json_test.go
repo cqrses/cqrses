@@ -1,6 +1,7 @@
 package messages_test
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -46,44 +47,16 @@ type myCustonType struct {
 
 func TestJSONMessageFactoryCustomTypes(t *testing.T) {
 	sut := messages.NewJSONMessageFactory()
-	sut.AddPayloadKeyFormatter("customSentence", func(in interface{}, serialise bool) interface{} {
-		if serialise {
-			if st, ok := in.(*myCustonType); ok {
-				return map[string]interface{}{
-					"sentence": st.Sentence,
-					"words":    st.Words,
-				}
-			}
-		} else {
-			st := in.(map[string]interface{})
-			words, _ := st["words"].(float64)
-			return &myCustonType{
-				Sentence: st["sentence"].(string),
-				Words:    int64(words),
-			}
-		}
-
-		return in
+	sut.AddDataTypeFactory("test.event", func() interface{} {
+		return &myCustonType{}
 	})
 
 	ctIn := &myCustonType{
-		Sentence: "my name is test",
+		Sentence: "world",
 		Words:    4,
 	}
 
-	event := messages.NewEvent(
-		"hello-world",
-		"test.event",
-		map[string]interface{}{
-			"hello":          "world",
-			"customSentence": ctIn,
-		},
-		map[string]interface{}{
-			"1+1": "2",
-		},
-		1,
-		time.Now(),
-	)
+	event := messages.NewEvent("hello-world", "test.event", json.RawMessage(`{"sentence": "world", "words": 4}`), map[string]interface{}{}, 1, time.Now())
 
 	in, err := sut.Serialize(event)
 	assert.Nil(t, err)
@@ -91,7 +64,7 @@ func TestJSONMessageFactoryCustomTypes(t *testing.T) {
 	out, err := sut.Unserialize(in)
 	assert.Nil(t, err)
 
-	ctOut, ok := out.Data()["customSentence"].(*myCustonType)
+	ctOut, ok := out.Data().(*myCustonType)
 	if !ok {
 		t.Fatalf("did not get *myCustomType back out")
 	}

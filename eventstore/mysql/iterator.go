@@ -15,17 +15,18 @@ type (
 	StreamIterator struct {
 		rows              *sql.Rows
 		currentItem       *messages.Event
-		currentKey        int64
 		batchHandler      batchHandler
+		currentKey        int
 		batchSize         uint64
 		batchPosition     uint64
 		fromNumber        uint64
 		currentFromNumber uint64
 		count             uint64
+		payloadBuilder    messages.PayloadBuilder
 	}
 )
 
-func iter(bh batchHandler, batchSize, fromNumber, count uint64) *StreamIterator {
+func iter(bh batchHandler, batchSize, fromNumber, count uint64, payloadBuilder messages.PayloadBuilder) *StreamIterator {
 	return &StreamIterator{
 		currentItem:       nil,
 		currentKey:        -1,
@@ -35,6 +36,7 @@ func iter(bh batchHandler, batchSize, fromNumber, count uint64) *StreamIterator 
 		fromNumber:        fromNumber,
 		currentFromNumber: fromNumber,
 		count:             count,
+		payloadBuilder:    payloadBuilder,
 	}
 }
 

@@ -12,7 +12,7 @@ type (
 	Event struct {
 		messageID   string
 		messageName string
-		data        map[string]interface{}
+		data        interface{}
 		metadata    map[string]interface{}
 		version     uint64
 		created     time.Time
@@ -20,7 +20,7 @@ type (
 )
 
 // NewEvent will return an immutable event.
-func NewEvent(id, name string, data, metadata map[string]interface{}, version uint64, created time.Time) *Event {
+func NewEvent(id, name string, data interface{}, metadata map[string]interface{}, version uint64, created time.Time) *Event {
 	return &Event{
 		messageID:   id,
 		messageName: name,
@@ -35,7 +35,7 @@ func NewEvent(id, name string, data, metadata map[string]interface{}, version ui
 // event, filling metadata with any information
 // that we know can be added to events such as
 // causation id.
-func NewEventFromContext(ctx context.Context, id, name string, data, metadata map[string]interface{}, version uint64, created time.Time) *Event {
+func NewEventFromContext(ctx context.Context, id, name string, data interface{}, metadata map[string]interface{}, version uint64, created time.Time) *Event {
 	if v, ok := ctx.Value(MetaCausationID).(string); ok {
 		metadata[string(MetaCausationID)] = v
 	}
@@ -48,7 +48,7 @@ func NewEventFromContext(ctx context.Context, id, name string, data, metadata ma
 }
 
 // NewAggregateEvent created a new event for an aggregate.
-func NewAggregateEvent(ctx context.Context, aggregateID string, aggregateVersion uint64, eventName string, data map[string]interface{}) *Event {
+func NewAggregateEvent(ctx context.Context, aggregateID string, aggregateVersion uint64, eventName string, data interface{}) *Event {
 	return NewEventFromContext(
 		ctx,
 		uuid.Must(uuid.NewV4()).String(),
@@ -74,7 +74,7 @@ func (e *Event) MessageName() string {
 }
 
 // Data will return information related to the event.
-func (e *Event) Data() map[string]interface{} {
+func (e *Event) Data() interface{} {
 	return e.data
 }
 

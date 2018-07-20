@@ -24,14 +24,15 @@ const (
 type (
 	// EventStore will use a MySQL database to manage streams.
 	EventStore struct {
-		db        *sql.DB
-		batchSize uint64
+		db             *sql.DB
+		batchSize      uint64
+		payloadBuilder messages.PayloadBuilder
 	}
 )
 
 // New returns a new MySQL event store, it is best to send a context
 // with a deadline so we do not hang.
-func New(ctx context.Context, dsn string, batchSize uint64) (*EventStore, error) {
+func New(ctx context.Context, dsn string, batchSize uint64, payloadBuilder messages.PayloadBuilder) (*EventStore, error) {
 	cfg, err := mysql.ParseDSN(dsn)
 	if err != nil {
 		return nil, err
@@ -56,8 +57,9 @@ func New(ctx context.Context, dsn string, batchSize uint64) (*EventStore, error)
 	}
 
 	return &EventStore{
-		db:        db,
-		batchSize: batchSize,
+		db:             db,
+		batchSize:      batchSize,
+		payloadBuilder: payloadBuilder,
 	}, nil
 }
 
@@ -72,7 +74,7 @@ func (s *EventStore) Load(ctx context.Context, streamName string, from, count ui
 	if err != nil {
 		return &ErrorStreamIterator{err}
 	}
-	return iter(newAggregateBatchHandler(s.db, tblName, true, matcher), s.batchSize, from, count)
+	return iter(newAggregateBatchHandler(s.db, tblName, true, matcher), s.batchSize, from, count, s.payloadBuilder)
 }
 
 // LoadReverse Loads events from the given stream name in reverse.
@@ -81,7 +83,7 @@ func (s *EventStore) LoadReverse(ctx context.Context, streamName string, from, c
 	if err != nil {
 		return &ErrorStreamIterator{err}
 	}
-	return iter(newAggregateBatchHandler(s.db, tblName, false, matcher), s.batchSize, from, count)
+	return iter(newAggregateBatchHandler(s.db, tblName, false, matcher), s.batchSize, from, count, s.payloadBuilder)
 }
 
 // FetchStreamNames gets  stream names that match the filter.

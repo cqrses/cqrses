@@ -10,7 +10,7 @@ type (
 	Command struct {
 		messageID   string
 		messageName string
-		data        map[string]interface{}
+		data        interface{}
 		metadata    map[string]interface{}
 		version     uint64
 		created     time.Time
@@ -18,7 +18,7 @@ type (
 )
 
 // NewCommand will return an immutable command.
-func NewCommand(id, name string, data, metadata map[string]interface{}, version uint64, created time.Time) *Command {
+func NewCommand(id, name string, data interface{}, metadata map[string]interface{}, version uint64, created time.Time) *Command {
 	return &Command{
 		messageID:   id,
 		messageName: name,
@@ -55,7 +55,7 @@ func (c *Command) MessageName() string {
 }
 
 // Data will return information related to the command.
-func (c *Command) Data() map[string]interface{} {
+func (c *Command) Data() interface{} {
 	return c.data
 }
 

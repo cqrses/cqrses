@@ -15,7 +15,7 @@ type (
 		MessageName() string
 
 		// Data will return information related to the event.
-		Data() map[string]interface{}
+		Data() interface{}
 
 		// Metadata will return metadata about the event.
 		Metadata() map[string]interface{}
