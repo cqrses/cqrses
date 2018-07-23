@@ -17,11 +17,6 @@ type (
 	// message building stratergy.
 	keyFormatter func(interface{}, bool) interface{}
 
-	// When you have a struct that represents a message's data you can use payload
-	// struct factories that should return a struct which the data will be unmarshalled
-	// into.
-	dataTypeFactory func() interface{}
-
 	JSONMessageFactory struct {
 		dataTypeFactories map[string]dataTypeFactory
 	}
@@ -48,8 +43,8 @@ func NewJSONMessageFactory() *JSONMessageFactory {
 	}
 }
 
-// AddDataTypeFactory ...
-func (f *JSONMessageFactory) AddDataTypeFactory(name string, factory dataTypeFactory) {
+// Builds ...
+func (f *JSONMessageFactory) Builds(name string, factory dataTypeFactory) {
 	f.dataTypeFactories[name] = factory
 }
 

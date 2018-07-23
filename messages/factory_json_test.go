@@ -47,7 +47,7 @@ type myCustonType struct {
 
 func TestJSONMessageFactoryCustomTypes(t *testing.T) {
 	sut := messages.NewJSONMessageFactory()
-	sut.AddDataTypeFactory("test.event", func() interface{} {
+	sut.Builds("test.event", func() interface{} {
 		return &myCustonType{}
 	})
 

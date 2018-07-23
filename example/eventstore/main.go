@@ -18,16 +18,16 @@ func main() {
 	ctx := context.Background()
 
 	msgFactory := messages.NewJSONMessageFactory()
-	msgFactory.AddDataTypeFactory(createUserCommand, func() interface{} {
+	msgFactory.Builds(createUserCommand, func() interface{} {
 		return &createUserPayload{}
 	})
-	msgFactory.AddDataTypeFactory(userCreated, func() interface{} {
+	msgFactory.Builds(userCreated, func() interface{} {
 		return &userCreatedPayload{}
 	})
-	msgFactory.AddDataTypeFactory(changeUserPasswordCommand, func() interface{} {
+	msgFactory.Builds(changeUserPasswordCommand, func() interface{} {
 		return &changeUserPasswordPayload{}
 	})
-	msgFactory.AddDataTypeFactory(userPasswordChanged, func() interface{} {
+	msgFactory.Builds(userPasswordChanged, func() interface{} {
 		return &userPasswordChangedPayload{}
 	})
 
