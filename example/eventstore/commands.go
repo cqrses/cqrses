@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-cqrses/cqrses/aggregate"
 	"github.com/go-cqrses/cqrses/bus"
-	"github.com/go-cqrses/cqrses/esbridge"
 	"github.com/go-cqrses/cqrses/messages"
 )
 
@@ -33,35 +32,12 @@ type (
 )
 
 func registerCommandBusHandlers(cmdBus *bus.CommandBus) {
-	cmdBus.Register(createUserCommand, func(ctx context.Context, msg messages.Message) error {
-		es := esbridge.MustGetEventStoreFromContext(ctx)
-		pl, ok := msg.Data().(*createUserPayload)
-		if !ok {
-			return errors.New("invalid command payload provided")
-		}
+	cmdHandler := aggregate.Make(func() aggregate.State {
+		return &user{}
+	}, "users")
 
-		u := &user{}
-		a := aggregate.New(pl.UserID, es, "users", u)
-		a.Handle(ctx, msg)
-
-		return a.Close(ctx)
-	})
-	cmdBus.Register(changeUserPasswordCommand, func(ctx context.Context, msg messages.Message) error {
-		es := esbridge.MustGetEventStoreFromContext(ctx)
-		pl, ok := msg.Data().(*changeUserPasswordPayload)
-		if !ok {
-			return errors.New("invalid command payload provided")
-		}
-
-		u := &user{}
-		a, err := aggregate.Load(ctx, pl.UserID, es, "users", u)
-		if err != nil {
-			return err
-		}
-		a.Handle(ctx, msg)
-
-		return a.Close(ctx)
-	})
+	cmdBus.Register(createUserCommand, cmdHandler)
+	cmdBus.Register(changeUserPasswordCommand, cmdHandler)
 }
 
 func createUserWith(ctx context.Context, id, emailAddress, hashedPassword string) (*messages.Command, error) {
@@ -104,6 +80,10 @@ func (c *createUserPayload) Validate() error {
 	return nil
 }
 
+func (c *createUserPayload) AggregateID() string {
+	return c.UserID
+}
+
 func changeUserPassword(ctx context.Context, id, newHashedPassword string) (*messages.Command, error) {
 	pl := &changeUserPasswordPayload{
 		UserID:   id,
@@ -137,4 +117,8 @@ func (c *changeUserPasswordPayload) Validate() error {
 	}
 
 	return nil
+}
+
+func (c *changeUserPasswordPayload) AggregateID() string {
+	return c.UserID
 }

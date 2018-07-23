@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/go-cqrses/cqrses/aggregate"
@@ -42,12 +43,27 @@ func (u *user) Handle(ctx context.Context, msg messages.Message, er aggregate.Ev
 		if err := cmd.Validate(); err != nil {
 			return err
 		}
-		return er(userCreated, cmd)
+
+		if u.id != "" {
+			return errors.New("user with that id already exists")
+		}
+
+		return er(userCreated, &userCreatedPayload{
+			UserID:       cmd.UserID,
+			EmailAddress: cmd.EmailAddress,
+			Password:     cmd.Password,
+		})
 	case *changeUserPasswordPayload:
 		if err := cmd.Validate(); err != nil {
 			return err
 		}
-		return er(userPasswordChanged, cmd)
+		return er(
+			userPasswordChanged,
+			&userPasswordChangedPayload{
+				UserID:   cmd.UserID,
+				Password: cmd.Password,
+			},
+		)
 	}
 	return nil
 }

@@ -2,13 +2,21 @@ package aggregate
 
 import (
 	"context"
+	"errors"
 	"sync"
 
+	"github.com/go-cqrses/cqrses/esbridge"
 	"github.com/go-cqrses/cqrses/eventstore"
 	"github.com/go-cqrses/cqrses/messages"
 )
 
 type (
+	Command interface {
+		AggregateID() string
+	}
+
+	StateFactory func() State
+
 	// Aggregate manages the history.
 	Aggregate struct {
 		// The ID of the aggregate we are dealing with.
@@ -36,6 +44,29 @@ type (
 		Apply(*messages.Event) error
 	}
 )
+
+func Make(af StateFactory, streamName string) func(ctx context.Context, msg messages.Message) error {
+	return func(ctx context.Context, msg messages.Message) error {
+		cmd, ok := msg.Data().(Command)
+		if !ok {
+			return errors.New("this command payload cannot be handled by cqrses.aggregate.Make")
+		}
+
+		es := esbridge.MustGetEventStoreFromContext(ctx)
+		ag := af()
+		history, err := Load(ctx, cmd.AggregateID(), es, streamName, ag)
+
+		if err != nil {
+			return err
+		}
+
+		if err := history.Handle(ctx, msg); err != nil {
+			return err
+		}
+
+		return history.Close(ctx)
+	}
+}
 
 // New should be used when intiailising an aggregate.
 func New(aID string, store eventstore.EventStore, streamName string, state State) *Aggregate {
