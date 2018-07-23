@@ -16,6 +16,17 @@ const (
 )
 
 type (
+	userCreatedPayload struct {
+		UserID       string `json:"user_id"`
+		EmailAddress string `json:"email_address"`
+		Password     string `json:"password"`
+	}
+
+	userPasswordChangedPayload struct {
+		UserID   string `json:"user_id"`
+		Password string `json:"password"`
+	}
+
 	user struct {
 		id           string
 		emailAddress string
@@ -26,33 +37,27 @@ type (
 )
 
 func (u *user) Handle(ctx context.Context, msg messages.Message, er aggregate.EventRecorder) error {
-	switch msg.MessageName() {
-	case createUserCommand:
-		data := &createUserPayload{}
-		data.FromPayload(msg.Data())
-		if err := data.Validate(); err != nil {
+	switch cmd := msg.Data().(type) {
+	case *createUserPayload:
+		if err := cmd.Validate(); err != nil {
 			return err
 		}
-		return er(userCreated, data.Payload())
-	case changeUserPasswordCommand:
-		data := &changeUserPasswordPayload{}
-		data.FromPayload(msg.Data())
-		if err := data.Validate(); err != nil {
+		return er(userCreated, cmd)
+	case *changeUserPasswordPayload:
+		if err := cmd.Validate(); err != nil {
 			return err
 		}
-		return er(userPasswordChanged, data.Payload())
+		return er(userPasswordChanged, cmd)
 	}
 	return nil
 }
 
 func (u *user) Apply(msg *messages.Event) error {
-	switch msg.MessageName() {
-	case userCreated:
-		data := &createUserPayload{}
-		data.FromPayload(msg.Data())
-		u.id = data.userID
-		u.emailAddress = data.emailAddress
-		u.password = data.password
+	switch event := msg.Data().(type) {
+	case *userCreatedPayload:
+		u.id = event.UserID
+		u.emailAddress = event.EmailAddress
+		u.password = event.Password
 		u.created = msg.Created()
 		u.removed = false
 	}

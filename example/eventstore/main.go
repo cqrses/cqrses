@@ -11,13 +11,28 @@ import (
 	"github.com/go-cqrses/cqrses/esbridge"
 	"github.com/go-cqrses/cqrses/eventstore"
 	"github.com/go-cqrses/cqrses/eventstore/mysql"
+	"github.com/go-cqrses/cqrses/messages"
 )
 
 func main() {
 	ctx := context.Background()
 
+	msgFactory := messages.NewJSONMessageFactory()
+	msgFactory.AddDataTypeFactory(createUserCommand, func() interface{} {
+		return &createUserPayload{}
+	})
+	msgFactory.AddDataTypeFactory(userCreated, func() interface{} {
+		return &userCreatedPayload{}
+	})
+	msgFactory.AddDataTypeFactory(changeUserPasswordCommand, func() interface{} {
+		return &changeUserPasswordPayload{}
+	})
+	msgFactory.AddDataTypeFactory(userPasswordChanged, func() interface{} {
+		return &userPasswordChangedPayload{}
+	})
+
 	var es eventstore.EventStore
-	es, err := mysql.New(ctx, "root:abcd@tcp(localhost:3306)/events", mysql.DefaultBatchSize)
+	es, err := mysql.New(ctx, "root:abcd@tcp(localhost:3306)/events", mysql.DefaultBatchSize, msgFactory)
 	if err != nil {
 		log.Fatalf("unable to connect to database: %s", err)
 	}

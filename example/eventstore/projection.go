@@ -19,13 +19,10 @@ type (
 	}
 )
 
-func (p *userProjector) Handle(ctx context.Context, event messages.Message) error {
-	switch event.MessageName() {
-	case userCreated:
-		data := event.Data()
-		id, _ := data["user_id"].(string)
-		emailAddress, _ := data["email_address"].(string)
-		p.all[id] = &userDTO{id, emailAddress}
+func (p *userProjector) Handle(ctx context.Context, msg messages.Message) error {
+	switch event := msg.Data().(type) {
+	case *userCreatedPayload:
+		p.all[event.UserID] = &userDTO{event.UserID, event.EmailAddress}
 	}
 	return nil
 }

@@ -167,7 +167,7 @@ func (s EventStore) Create(ctx context.Context, stream *eventstore.Stream) error
 	defer s.lock.Unlock()
 
 	_, ok := s.streams[stream.Name]
-	if !ok {
+	if ok {
 		return eventstore.ErrStreamAlreadyExists
 	}
 

@@ -2,7 +2,6 @@ package messages
 
 import (
 	"encoding/json"
-	"errors"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -33,7 +32,7 @@ type (
 		Data        interface{}            `json:"data"`
 		Metadata    map[string]interface{} `json:"metadata"`
 		Version     uint64                 `json:"version"`
-		Created     string                 `json:"created"`
+		Created     string                 `json:"created_at"`
 	}
 
 	JSONMessageWrapper struct {
@@ -99,10 +98,15 @@ func (f *JSONMessageFactory) Unserialize(m []byte) (Message, error) {
 		return nil, err
 	}
 	dtf, ok := f.Build(msgName, data)
-	if !ok {
-		return nil, errors.New("unknown message name")
+	if ok {
+		out.Data = dtf
+	} else {
+		var dtm map[string]interface{}
+		if err := json.Unmarshal(data, &dtm); err != nil {
+			return nil, err
+		}
+		out.Data = dtm
 	}
-	out.Data = dtf
 
 	// Get the payload.
 	if md, _, _, err := jsonparser.Get(m, "metadata"); err != nil {

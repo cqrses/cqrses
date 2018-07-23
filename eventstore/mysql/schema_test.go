@@ -7,5 +7,5 @@ import (
 )
 
 func TestMakeStreamTableName(t *testing.T) {
-	assert.Equal(t, "_7DFB4CF67742CB0660305E56EF816C53FCEC892CAE7F6EE39B75F34E659D672C", makeStreamTableName("users"))
+	assert.Equal(t, "_5B7DCD14A4FAA2CDD54CF6EB8D4BC35DA31914A1", makeStreamTableName("users"))
 }

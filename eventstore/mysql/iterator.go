@@ -73,12 +73,19 @@ func (it *StreamIterator) Next(ctx context.Context) error {
 		return err
 	}
 
-	var jp, jm map[string]interface{}
-	if err := json.Unmarshal([]byte(payload), &jp); err != nil {
-		return err
-	}
+	var jm map[string]interface{}
 	if err := json.Unmarshal([]byte(metadata), &jm); err != nil {
 		return err
+	}
+
+	var jp interface{}
+	jp, ok := it.payloadBuilder.Build(eventName, []byte(payload))
+	if !ok {
+		var jp2 map[string]interface{}
+		if err := json.Unmarshal([]byte(payload), &jp2); err != nil {
+			return err
+		}
+		jp = jp2
 	}
 
 	t, err := time.Parse("2006-01-02 15:04:05", createdAt)

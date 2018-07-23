@@ -33,7 +33,7 @@ func NewCommand(id, name string, data interface{}, metadata map[string]interface
 // command, filling metadata with any information
 // that we know can be added to commands such as
 // causation id.
-func NewCommandFromContext(ctx context.Context, id, name string, data, metadata map[string]interface{}, version uint64, created time.Time) *Command {
+func NewCommandFromContext(ctx context.Context, id, name string, data interface{}, metadata map[string]interface{}, version uint64, created time.Time) *Command {
 	return &Command{
 		messageID:   id,
 		messageName: name,

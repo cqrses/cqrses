@@ -28,7 +28,7 @@ type (
 	}
 
 	// EventRecorder will record aggregate events.
-	EventRecorder func(eventName string, data map[string]interface{}) error
+	EventRecorder func(eventName string, data interface{}) error
 
 	// State is the user land implementation of the aggregate.
 	State interface {
@@ -95,20 +95,20 @@ func (h *Aggregate) Handle(ctx context.Context, msg messages.Message) error {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
-	return h.state.Handle(ctx, msg, func(eventName string, data map[string]interface{}) error {
+	return h.state.Handle(ctx, msg, func(eventName string, data interface{}) error {
 		return h.record(ctx, eventName, data)
 	})
 }
 
 // RecordThat an event that has happened increasing the version of the aggregate.
-func (h *Aggregate) RecordThat(ctx context.Context, eventName string, data map[string]interface{}) error {
+func (h *Aggregate) RecordThat(ctx context.Context, eventName string, data interface{}) error {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
 	return h.record(ctx, eventName, data)
 }
 
-func (h *Aggregate) record(ctx context.Context, eventName string, data map[string]interface{}) error {
+func (h *Aggregate) record(ctx context.Context, eventName string, data interface{}) error {
 	h.version++
 	event := messages.NewAggregateEvent(ctx, h.aggregateID, h.version, eventName, data)
 	h.pending = append(h.pending, event)

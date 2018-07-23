@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/go-cqrses/cqrses/eventstore"
 	"github.com/go-cqrses/cqrses/eventstore/inmem"
 	"github.com/go-cqrses/cqrses/messages"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStore(t *testing.T) {
@@ -21,7 +21,7 @@ func TestStore(t *testing.T) {
 
 	{ // Check to make sure we get an error returned when a stream does not exist and we attempt to iterate over it.
 		stream := store.Load(ctx, "na", 0, 1000, eventstore.MetadataMatcher{})
-		assert.Equal(t, eventstore.ErrStreamDoesNotExist, stream.Next())
+		assert.Equal(t, eventstore.ErrStreamDoesNotExist, stream.Next(ctx))
 	}
 
 	{ // Check fetching stream names.
@@ -66,14 +66,14 @@ func TestStore(t *testing.T) {
 		stream := store.Load(ctx, "todo", 0, 1000, eventstore.MetadataMatcher{})
 		expecteds := []string{"ev1", "ev2", "ev3", "ev4", "ev5", "ev6", "ev7", "ev8"}
 		for i := 0; i < len(expecteds); i++ {
-			if err := stream.Next(); err != nil {
+			if err := stream.Next(ctx); err != nil {
 				t.Fatalf("unable to get next item in stream: %s", err)
 			}
 			event := stream.Current()
 			assert.Equal(t, expecteds[i], event.MessageID())
 		}
 
-		if err := stream.Next(); err != eventstore.EOF {
+		if err := stream.Next(ctx); err != eventstore.EOF {
 			t.Errorf("expected eventstore.EOF but got: %+v", err)
 		}
 
@@ -81,14 +81,14 @@ func TestStore(t *testing.T) {
 
 		stream.Rewind()
 		for i := 0; i < len(expecteds); i++ {
-			if err := stream.Next(); err != nil {
+			if err := stream.Next(ctx); err != nil {
 				t.Fatalf("unable to get next item in stream: %s", err)
 			}
 			event := stream.Current()
 			assert.Equal(t, expecteds[i], event.MessageID())
 		}
 
-		if err := stream.Next(); err != eventstore.EOF {
+		if err := stream.Next(ctx); err != eventstore.EOF {
 			t.Errorf("expected eventstore.EOF but got: %+v", err)
 		}
 
@@ -99,14 +99,14 @@ func TestStore(t *testing.T) {
 		stream := store.Load(ctx, "todo", 2, 5, eventstore.MetadataMatcher{})
 		expecteds := []string{"ev3", "ev4", "ev5", "ev6", "ev7"}
 		for i := 0; i < len(expecteds); i++ {
-			if err := stream.Next(); err != nil {
+			if err := stream.Next(ctx); err != nil {
 				t.Fatalf("unable to get next item in stream: %s", err)
 			}
 			event := stream.Current()
 			assert.Equal(t, expecteds[i], event.MessageID())
 		}
 
-		if err := stream.Next(); err != eventstore.EOF {
+		if err := stream.Next(ctx); err != eventstore.EOF {
 			t.Errorf("expected eventstore.EOF but got: %+v", err)
 		}
 		stream.Close()
@@ -116,14 +116,14 @@ func TestStore(t *testing.T) {
 		stream := store.LoadReverse(ctx, "todo", 2, 5, eventstore.MetadataMatcher{})
 		expecteds := []string{"ev5", "ev4", "ev3", "ev2", "ev1"}
 		for i := 0; i < len(expecteds); i++ {
-			if err := stream.Next(); err != nil {
+			if err := stream.Next(ctx); err != nil {
 				t.Fatalf("unable to get next item in stream: %s", err)
 			}
 			event := stream.Current()
 			assert.Equal(t, expecteds[i], event.MessageID())
 		}
 
-		if err := stream.Next(); err != eventstore.EOF {
+		if err := stream.Next(ctx); err != eventstore.EOF {
 			t.Errorf("expected eventstore.EOF but got: %+v", err)
 		}
 		stream.Close()
