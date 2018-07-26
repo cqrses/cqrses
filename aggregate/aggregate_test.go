@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/go-cqrses/cqrses/adapters/inmem"
 	"github.com/go-cqrses/cqrses/aggregate"
 	"github.com/go-cqrses/cqrses/eventstore"
-	"github.com/go-cqrses/cqrses/eventstore/inmem"
 	"github.com/go-cqrses/cqrses/messages"
 
 	"github.com/stretchr/testify/assert"

@@ -43,7 +43,7 @@ const (
 		"CREATE TABLE IF NOT EXISTS `projections` (" +
 		"	`no` BIGINT(20) NOT NULL AUTO_INCREMENT," +
 		"	`name` VARCHAR(150) NOT NULL," +
-		"	`position` BIGINT(20)," +
+		"	`position` JSON," +
 		"	`status` VARCHAR(28) NOT NULL," +
 		"	PRIMARY KEY (`no`)," +
 		"	UNIQUE KEY `ix_name` (`name`)" +

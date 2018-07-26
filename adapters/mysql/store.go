@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-cqrses/cqrses/eventstore"
 	"github.com/go-cqrses/cqrses/messages"
+	"github.com/go-cqrses/cqrses/projection"
 
 	// MySQL driver for the database/sql package.
 	"github.com/go-sql-driver/mysql"
@@ -71,6 +72,10 @@ func New(ctx context.Context, dsn string, batchSize uint64, payloadBuilder messa
 // Ping tests connection to the database is still ok.
 func (s *EventStore) Ping(ctx context.Context) error {
 	return s.db.PingContext(ctx)
+}
+
+func (s *EventStore) GetProjectionManager([]projection.ProjectorOpt) projection.Manager {
+	return NewProjectionManager(s)
 }
 
 // Load events from the given stream name.

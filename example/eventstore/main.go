@@ -9,10 +9,10 @@ import (
 
 	"github.com/go-cqrses/cqrses/projection"
 
+	"github.com/go-cqrses/cqrses/adapters/mysql"
 	"github.com/go-cqrses/cqrses/bus"
 	"github.com/go-cqrses/cqrses/esbridge"
 	"github.com/go-cqrses/cqrses/eventstore"
-	"github.com/go-cqrses/cqrses/eventstore/mysql"
 	"github.com/go-cqrses/cqrses/messages"
 )
 

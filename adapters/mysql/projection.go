@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"context"
-	"database/sql"
+	"strconv"
 	"sync"
 	"time"
 
@@ -24,63 +24,7 @@ type (
 		modLock     *sync.Mutex
 		close       chan struct{}
 	}
-
-	// ProjectionManager ...
-	ProjectionManager struct {
-		es *EventStore
-	}
 )
-
-// NewProjectionManager will get a projection manager that uses the MySQL backend
-// to store projection states.
-func NewProjectionManager(es *EventStore) projection.Manager {
-	return &ProjectionManager{
-		es: es,
-	}
-}
-
-// Create ...
-func (m *ProjectionManager) Create(ctx context.Context, name string, opts []projection.ProjectorOpt) (projection.Projector, error) {
-	options, err := projection.BuildOptionsFrom(opts)
-	if err != nil {
-		return nil, err
-	}
-	return &StreamProjection{
-		name:        name,
-		es:          m.es,
-		streamNames: []string{},
-		opts:        options,
-		handlers:    map[string][]projection.Handler{},
-		any:         []projection.Handler{},
-		close:       make(chan struct{}, 1),
-		modLock:     &sync.Mutex{},
-	}, nil
-}
-
-// FetchProjectionNames ...
-func (m *ProjectionManager) FetchProjectionNames(ctx context.Context, filter string, start, limit uint64) ([]string, error) {
-	var res *sql.Rows
-	var err error
-	out := make([]string, 0, limit)
-
-	if len(filter) == 0 {
-		res, err = m.es.db.QueryContext(ctx, "select `name` from projections limit ?,?", start, limit)
-	} else {
-		res, err = m.es.db.QueryContext(ctx, "select `name` from where name like ? limit ?,?", filter, start, limit)
-	}
-
-	if err == nil {
-		for res.Next() {
-			var name string
-			if err = res.Scan(&name); err != nil {
-				return out, err
-			}
-			out = append(out, name)
-		}
-	}
-
-	return out, err
-}
 
 // FromStream will limit the Projector to events from 1 stream.
 func (p *StreamProjection) FromStream(streamName string) projection.Projector {
@@ -170,7 +114,7 @@ func (p *StreamProjection) ensureProjectionExists(ctx context.Context) error {
 		return nil
 	}
 
-	_, err := p.es.db.ExecContext(ctx, "insert projections (name, position, status) values (?, ?, ?)", p.name, 0, projection.StatusIdle)
+	_, err := p.es.db.ExecContext(ctx, "insert projections (name, position, status) values (?, ?, ?)", p.name, "{}", projection.StatusIdle)
 	return errors.Wrap(err, "unable to store projection in projections store")
 }
 
@@ -179,9 +123,8 @@ func (p *StreamProjection) retreiveEventsFromStream(ctx context.Context, cEvents
 		return errors.Errorf("expected 1 stream to query got %d", snl)
 	}
 
-	var position uint64
-	res := p.es.db.QueryRowContext(ctx, "select position from projections where name = ?", p.name)
-	if err := res.Scan(&position); err != nil {
+	position, err := p.getStreamPosition(ctx, p.streamNames[0])
+	if err != nil {
 		return err
 	}
 
@@ -197,10 +140,35 @@ func (p *StreamProjection) retreiveEventsFromStream(ctx context.Context, cEvents
 
 		cEvents <- it.Current()
 
-		if _, err := p.es.db.ExecContext(ctx, "update projections set position = position+1 where name = ?", p.name); err != nil {
-			return errors.Wrap(err, "unable to set projection position, this will lead to duplicate events when next run")
+		position++
+		if err := p.updateStreamPosition(ctx, p.streamNames[0], position); err != nil {
+			return err
 		}
 	}
+}
+
+func (p *StreamProjection) getStreamPosition(ctx context.Context, streamName string) (uint64, error) {
+	positions, err := fetchPojectionStreamPositions(ctx, p.es.db, p.name)
+	if err != nil {
+		return 0, err
+	}
+
+	for sn, pos := range positions {
+		if sn == streamName {
+			return pos, nil
+		}
+	}
+
+	return 0, nil
+}
+
+func (p *StreamProjection) updateStreamPosition(ctx context.Context, streamName string, position uint64) error {
+	_, err := p.es.db.ExecContext(
+		ctx,
+		`update projections set position = JSON_SET(position, '$.`+streamName+`', `+strconv.Itoa(int(position))+`) where name = ?`,
+		p.name,
+	)
+	return err
 }
 
 func (p *StreamProjection) handleEvents(ctx context.Context, cEvents chan *messages.Event) {

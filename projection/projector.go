@@ -7,23 +7,7 @@ import (
 	"github.com/go-cqrses/cqrses/messages"
 )
 
-const (
-	// StatusRunning is set when the projector is running.
-	StatusRunning Status = "running"
-	// StatusStopping is set when the projector is stopping.
-	StatusStopping Status = "stopping"
-	// StatusDeleting is set when the projector is deleting.
-	StatusDeleting Status = "deleting"
-	// StatusResetting is set when the projector is resetting.
-	StatusResetting Status = "resetting"
-	// StatusIdle is set when the projector is idle.
-	StatusIdle Status = "idle"
-)
-
 type (
-	// Status of the projection.
-	Status string
-
 	// Handler should handle the event provided.
 	Handler func(context.Context, messages.Message) error
 
@@ -50,15 +34,6 @@ type (
 	ProjectorOpts struct {
 		// Sleep how long after reading all the events should we sleep before reading more.
 		Sleep time.Duration
-	}
-
-	// Manager manages projections.
-	Manager interface {
-		// Create a new stream.
-		Create(ctx context.Context, name string, options []ProjectorOpt) (Projector, error)
-
-		// FetchProjections ...
-		FetchProjectionNames(ctx context.Context, filter string, start, limit uint64) ([]string, error)
 	}
 )
 
