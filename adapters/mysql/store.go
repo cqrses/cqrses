@@ -74,7 +74,13 @@ func (s *EventStore) Ping(ctx context.Context) error {
 	return s.db.PingContext(ctx)
 }
 
-func (s *EventStore) GetProjectionManager([]projection.ProjectorOpt) projection.Manager {
+// DB will return the database being used.
+func (s *EventStore) DB() *sql.DB {
+	return s.db
+}
+
+// GetProjectionManager ...
+func (s *EventStore) GetProjectionManager() projection.Manager {
 	return NewProjectionManager(s)
 }
 

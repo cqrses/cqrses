@@ -53,6 +53,6 @@ type (
 	// manager. We have decided to not put this in the event store package to keep is separated,
 	// however your event store implementation should have one.
 	HasProjectionManager interface {
-		GetProjectionManager([]ProjectorOpt) Manager
+		GetProjectionManager() Manager
 	}
 )
