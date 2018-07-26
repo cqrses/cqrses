@@ -7,6 +7,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/go-cqrses/cqrses/projection"
+
 	"github.com/go-cqrses/cqrses/bus"
 	"github.com/go-cqrses/cqrses/esbridge"
 	"github.com/go-cqrses/cqrses/eventstore"
@@ -46,15 +48,6 @@ func main() {
 		log.Fatalf("unable to create users stream: %s", err)
 	}
 
-	eventBus := bus.NewEventBus()
-
-	users := userCollection{}
-	proj := &userProjector{
-		all: users,
-	}
-	eventBus.Register(bus.MatchAny(), proj.Handle)
-	es = eventBus.WrapStore(es)
-
 	cmdBus := bus.NewCommandBus()
 	cmdBus.PushMiddleware(esbridge.AttachEventStoreToBus(es))
 
@@ -71,6 +64,20 @@ func main() {
 			log.Fatalf("unable to change user(%s) to a more secure password: %s", user, err)
 		}
 	}
+
+	users := userCollection{}
+	proj := &userProjector{
+		all: users,
+	}
+	pm := mysql.NewProjectionManager(es.(*mysql.EventStore))
+	pj, err := pm.Create(ctx, "users_dto", []projection.ProjectorOpt{})
+	if err != nil {
+		log.Fatalf("unable to create projection: %s", err)
+	}
+	go func() {
+		err := pj.FromStream("users").WhenAny(proj.Handle).Run(ctx)
+		log.Fatalf("projection run error: %s", err)
+	}()
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for {

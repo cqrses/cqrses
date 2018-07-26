@@ -38,10 +38,25 @@ const (
 		"    UNIQUE KEY `ix_event_id` (`event_id`)," +
 		"    UNIQUE KEY `ix_unique_event` (`aggregate_id`, `aggregate_version`)" +
 		") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin"
+
+	projectionTable = "" +
+		"CREATE TABLE IF NOT EXISTS `projections` (" +
+		"	`no` BIGINT(20) NOT NULL AUTO_INCREMENT," +
+		"	`name` VARCHAR(150) NOT NULL," +
+		"	`position` BIGINT(20)," +
+		"	`status` VARCHAR(28) NOT NULL," +
+		"	PRIMARY KEY (`no`)," +
+		"	UNIQUE KEY `ix_name` (`name`)" +
+		") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
 )
 
 func applyEventStreamsSchema(ctx context.Context, db *sql.DB) error {
 	_, err := db.ExecContext(ctx, eventStreamsTable)
+	return err
+}
+
+func applyProjectionsSchema(ctx context.Context, db *sql.DB) error {
+	_, err := db.ExecContext(ctx, projectionTable)
 	return err
 }
 

@@ -56,6 +56,11 @@ func New(ctx context.Context, dsn string, batchSize uint64, payloadBuilder messa
 		return nil, err
 	}
 
+	if err := applyProjectionsSchema(ctx, db); err != nil {
+		db.Close()
+		return nil, err
+	}
+
 	return &EventStore{
 		db:             db,
 		batchSize:      batchSize,
