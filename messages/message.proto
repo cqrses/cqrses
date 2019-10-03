@@ -1,0 +1,33 @@
+syntax = "proto3";
+package com.github.go_cqrses.cqrses.messages;
+
+option go_package = ";messages";
+
+import "google/protobuf/timestamp.proto";
+
+// Used to seralise messages for storaging and transfering.
+message DomainMessage {
+    // Identitifer for message.
+    string message_id = 1;
+
+    // The name of the message.
+    string message_name = 2;
+
+    // The message payload.
+    bytes data = 3;
+
+    // Metadata associated to the message.
+    map<string, bytes> metadata = 4;
+
+    // The version of the domain message.
+    uint64 version = 5;
+
+    // When the domain message was first created.
+    google.protobuf.Timestamp created = 6;
+}
+
+message TestPayload {
+    string a_string = 1;
+    int64 a_int = 2;
+    bool a_bool = 3;
+}
