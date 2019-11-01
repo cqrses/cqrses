@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 
 	"github.com/go-cqrses/cqrses/aggregate"
 	"github.com/go-cqrses/cqrses/bus"
