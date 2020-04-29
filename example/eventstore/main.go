@@ -70,6 +70,7 @@ func main() {
 		all: users,
 	}
 	pm := mysql.NewProjectionManager(es.(*mysql.EventStore))
+	_ = pm.Delete(ctx, "users_dto") // ensure the collection it built from begining
 	pj, err := pm.Create(ctx, "users_dto", []projection.ProjectorOpt{})
 	if err != nil {
 		log.Fatalf("unable to create projection: %s", err)
@@ -86,6 +87,14 @@ func main() {
 		scanner.Scan()
 
 		switch scanner.Text() {
+		case "add more":
+			fmt.Println("Added 5 more users, calling this again show a duplicate id error")
+			for _, user := range []string{"f1", "g2", "h3", "i4", "j5"} {
+				cmd, _ := createUserWith(ctx, "638d863b-3248-4b56-9d0a-e25f62c8cb"+user, user+"@testing.com", "changeme")
+				if err := cmdBus.Handle(ctx, cmd); err != nil {
+					log.Printf("unable to create user(%s): %s\n", user, err)
+				}
+			}
 		case "show users":
 			fmt.Println("Showing all users:")
 			for _, udto := range users {

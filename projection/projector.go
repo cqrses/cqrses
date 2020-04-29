@@ -40,7 +40,7 @@ type (
 // BuildOptionsFrom ...
 func BuildOptionsFrom(opts []ProjectorOpt) (*ProjectorOpts, error) {
 	out := &ProjectorOpts{
-		Sleep: 5 * time.Second,
+		Sleep: 200 * time.Millisecond,
 	}
 	for _, opt := range opts {
 		if err := opt(out); err != nil {

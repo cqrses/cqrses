@@ -86,14 +86,16 @@ func (p *StreamProjection) Run(ctx context.Context) error {
 	go p.handleEvents(ctx, cEvents)
 
 	go func() {
-		select {
-		case <-p.close:
-			cErr <- errors.New("projection was closed")
-			return
-		case <-time.After(p.opts.Sleep):
-			if err := p.retreiveEventsFromStream(ctx, cEvents); err != nil {
-				cErr <- err
+		for {
+			select {
+			case <-p.close:
+				cErr <- errors.New("projection was closed")
 				return
+			case <-time.After(p.opts.Sleep):
+				if err := p.retreiveEventsFromStream(ctx, cEvents); err != nil {
+					cErr <- err
+					return
+				}
 			}
 		}
 	}()
